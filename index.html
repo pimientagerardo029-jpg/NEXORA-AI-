@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXORA IA</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ background:#09090b;
+ color:white;
+ font-family:Arial,sans-serif;
+ min-height:100vh;
+ display:flex;
+ flex-direction:column;
+}
+header{
+ padding:20px;
+ border-bottom:1px solid #292929;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+}
+.logo{font-size:24px;font-weight:bold;letter-spacing:2px}
+.status{color:#aaa;font-size:12px}
+main{
+ flex:1;
+ width:100%;
+ max-width:750px;
+ margin:auto;
+ padding:25px 18px;
+}
+.welcome{text-align:center;margin:65px 0 35px}
+.welcome h1{font-size:32px}
+.welcome p{color:#aaa}
+#messages{display:flex;flex-direction:column;gap:15px}
+.message{
+ padding:14px 16px;
+ border-radius:14px;
+ max-width:90%;
+ line-height:1.5;
+ white-space:pre-wrap;
+}
+.user{background:#292929;align-self:flex-end}
+.ai{background:#171717;border:1px solid #303030;align-self:flex-start}
+form{
+ display:flex;
+ gap:10px;
+ padding:15px;
+ background:#111;
+ border:1px solid #333;
+ border-radius:16px;
+ margin-top:25px;
+}
+input{
+ flex:1;min-width:0;
+ background:transparent;
+ border:0;outline:0;
+ color:white;font-size:16px;
+}
+button{
+ background:white;color:black;
+ border:0;border-radius:10px;
+ padding:12px 17px;
+ font-weight:bold;
+}
+footer{text-align:center;color:#777;font-size:12px;padding:15px}
+</style>
+</head>
+<body>
+<header>
+ <div class="logo">NEXORA IA</div>
+ <div class="status">ASISTENTE INTELIGENTE</div>
+</header>
+<main>
+ <section class="welcome" id="welcome">
+  <h1>Hola, soy NEXORA.</h1>
+  <p>Tu espacio de inteligencia artificial.</p>
+ </section>
+ <div id="messages"></div>
+ <form id="chat">
+  <input id="question" placeholder="Escribe tu mensaje..." autocomplete="off">
+  <button type="submit">Enviar</button>
+ </form>
+</main>
+<footer>ANÓNIMO STUDIOS · NEXORA IA</footer>
+<script>
+const form=document.getElementById("chat");
+const input=document.getElementById("question");
+const messages=document.getElementById("messages");
+
+function addMessage(text,type){
+ const div=document.createElement("div");
+ div.className="message "+type;
+ div.textContent=text;
+ messages.appendChild(div);
+ window.scrollTo(0,document.body.scrollHeight);
+}
+
+form.addEventListener("submit",function(e){
+ e.preventDefault();
+ const text=input.value.trim();
+ if(!text)return;
+ document.getElementById("welcome").style.display="none";
+ addMessage(text,"user");
+ input.value="";
+ addMessage("Hola. Soy NEXORA IA. Mi interfaz está funcionando. Pronto conectaré mi motor de inteligencia artificial.","ai");
+});
+</script>
+</body>
+</html>
