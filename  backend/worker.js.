@@ -1,0 +1,54 @@
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type"
+};
+
+export default {
+  async fetch(request, env) {
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        headers: corsHeaders
+      });
+    }
+
+    if (request.method !== "POST") {
+      return Response.json({
+        name: "NEXORA IA",
+        status: "online",
+        message: "Servidor preparado"
+      }, { headers: corsHeaders });
+    }
+
+    try {
+      const data = await request.json();
+
+      if (!data.message || typeof data.message !== "string") {
+        return Response.json({
+          error: "Mensaje no válido"
+        }, {
+          status: 400,
+          headers: corsHeaders
+        });
+      }
+
+      return Response.json({
+        name: "NEXORA IA",
+        status: "ready",
+        message: "El servidor recibió tu mensaje.",
+        model: "not_connected"
+      }, {
+        headers: corsHeaders
+      });
+
+    } catch (error) {
+      return Response.json({
+        error: "No se pudo procesar la solicitud"
+      }, {
+        status: 400,
+        headers: corsHeaders
+      });
+    }
+  }
+};
