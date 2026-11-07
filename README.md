@@ -29,4 +29,4 @@ Desarrollador
 
 ANÓNIMO STUDIOS
 
-Proyecto en desarrollo.
+Proyecto en desarrollo
