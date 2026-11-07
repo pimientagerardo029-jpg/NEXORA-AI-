@@ -1,52 +1,135 @@
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "POST, OPTIONS, GET",
   "Access-Control-Allow-Headers": "Content-Type"
 };
 
 export default {
   async fetch(request, env) {
+
     if (request.method === "OPTIONS") {
       return new Response(null, {
         headers: corsHeaders
       });
     }
 
-    if (request.method !== "POST") {
+    if (request.method === "GET") {
       return Response.json({
         name: "NEXORA IA",
         status: "online",
-        message: "Servidor preparado"
-      }, { headers: corsHeaders });
+        model: "llama-3.3-70b-versatile"
+      }, {
+        headers: corsHeaders
+      });
+    }
+
+    if (request.method !== "POST") {
+      return Response.json({
+        error: "Método no permitido"
+      }, {
+        status: 405,
+        headers: corsHeaders
+      });
     }
 
     try {
+      if (!env.GROQ_API_KEY) {
+        return Response.json({
+          error: "Falta configurar la clave de IA"
+        }, {
+          status: 500,
+          headers: corsHeaders
+        });
+      }
+
       const data = await request.json();
 
-      if (!data.message || typeof data.message !== "string") {
+      if (
+        typeof data.message !== "string" ||
+        !data.message.trim()
+      ) {
         return Response.json({
-          error: "Mensaje no válido"
+          error: "Escribe un mensaje válido"
         }, {
           status: 400,
           headers: corsHeaders
         });
       }
 
+      if (data.message.length > 8000) {
+        return Response.json({
+          error: "El mensaje es demasiado largo"
+        }, {
+          status: 400,
+          headers: corsHeaders
+        });
+      }
+
+      const groqResponse = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${env.GROQ_API_KEY}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            messages: [
+              {
+                role: "system",
+                content: "Eres NEXORA IA, un asistente de inteligencia artificial creado por ANÓNIMO STUDIOS. Responde en español de manera clara, amable y útil."
+              },
+              {
+                role: "user",
+                content: data.message.trim()
+              }
+            ],
+            temperature: 0.7,
+            max_completion_tokens: 1024
+          })
+        }
+      );
+
+      if (!groqResponse.ok) {
+        return Response.json({
+          error: "No se pudo obtener respuesta del motor de IA",
+          status: groqResponse.status
+        }, {
+          status: 502,
+          headers: corsHeaders
+        });
+      }
+
+      const result = await groqResponse.json();
+
+      const answer =
+        result.choices?.[0]?.message?.content;
+
+      if (!answer) {
+        return Response.json({
+          error: "El motor de IA no devolvió una respuesta"
+        }, {
+          status: 502,
+          headers: corsHeaders
+        });
+      }
+
       return Response.json({
         name: "NEXORA IA",
-        status: "ready",
-        message: "El servidor recibió tu mensaje.",
-        model: "not_connected"
+        status: "success",
+        model: result.model,
+        reply: answer
       }, {
         headers: corsHeaders
       });
 
     } catch (error) {
       return Response.json({
-        error: "No se pudo procesar la solicitud"
+        error: "Error al procesar el mensaje"
       }, {
-        status: 400,
+        status: 500,
         headers: corsHeaders
       });
     }
